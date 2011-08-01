@@ -1,0 +1,35 @@
+=== WP-Cron Control ===
+Contributors: tott, automattic
+Tags: wp-cron, cron, cron jobs
+Donate link: http://hitchhackerguide.com
+Tested up to: 3.1.2
+Stable tag: trunk
+
+This plugin allows you to take control over the execution of cron jobs. 
+
+== Description ==
+
+This plugin allows you to take control over the execution of cron jobs. It's mainly useful for sites that either don't get enough comments to ensure a frequent execution of wp-cron or for sites where the execution of cron via regular methods can cause race conditions resulting in multiple execution of wp-cron at the same time.
+
+This plugin implements a secret parameter and ensures that cron jobs are only executed when this parameter is existing.
+
+== Installation ==
+
+* Install either via the WordPress.org plugin directory, or by uploading the files to your server.
+* Activate the Plugin and ensure that you enable the feature in the plugins' settings screen
+* Follow the instructions on the plugins' settings screen in order to set up a cron job that either calls `php wp-cron-control.php http://blog.address secret_string` or `wget -q "http://blog.address/wp-cron.php?doing_wp_cron&secret_string"`
+* If you like to have a global secret string you can define it in your wp-config.php by adding `define( 'WP_CRON_CONTROL_SECRET', my_secret_string' );`
+
+== Limitations ==
+
+This plugin performs a `remove_action( 'sanitize_comment_cookies', 'wp_cron' );` call in order to disable the spawning of new cron processes via the regular WordPress method. If `wp_cron` is hooked in an other action or called directly this might cause trouble.
+ 
+== Screenshots ==
+
+1. Settings screen to enable/disable various features.
+
+== ChangeLog ==
+
+= Version 0.1 =
+
+* Initial version of this plugin.
