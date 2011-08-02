@@ -30,6 +30,10 @@ This plugin performs a `remove_action( 'sanitize_comment_cookies', 'wp_cron' );`
 
 == ChangeLog ==
 
+= Version 0.2 =
+
+* Added capability check in settings page
+
 = Version 0.1 =
 
 * Initial version of this plugin.

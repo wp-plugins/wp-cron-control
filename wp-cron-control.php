@@ -4,7 +4,7 @@
  Plugin URI: http://wordpress.org/extend/plugins/wp-cron-control/
  Description: get control over wp-cron execution.
  Author: Thorsten Ott, Automattic
- Version: 0.1
+ Version: 0.2
  Author URI: http://hitchhackerguide.com
  */
 
@@ -105,80 +105,84 @@ class WP_Cron_Control {
 		return $settings;
 	}
 	
-	public function settings_page() { ?>
-	<div class="wrap">
-	<?php if ( function_exists('screen_icon') ) screen_icon(); ?>
-		<h2><?php echo $this->settings_page_name; ?></h2>
-	
-		<form method="post" action="options.php">
-	
-		<?php settings_fields( $this->plugin_prefix . 'settings' ); ?>
-	
-		<table class="form-table">
-			<?php foreach( $this->settings as $setting => $value): ?>
-			<tr valign="top">
-				<th scope="row"><label for="<?php echo $this->dashed_name . '-' . $setting; ?>"><?php if ( isset( $this->settings_texts[$setting]['label'] ) ) { echo $this->settings_texts[$setting]['label']; } else { echo $setting; } ?></label></th>
-				<td>
-					<?php switch( $this->settings_texts[$setting]['type'] ):
-						case 'yesno': ?>
-							<select name="<?php echo $this->plugin_prefix; ?>settings[<?php echo $setting; ?>]" id="<?php echo $this->dashed_name . '-' . $setting; ?>" class="postform">
-								<?php 
-									$yesno = array( 0 => 'No', 1 => 'Yes' ); 
-									foreach ( $yesno as $val => $txt ) {
-										echo '<option value="' . esc_attr( $val ) . '"' . selected( $value, $val, false ) . '>' . esc_html( $txt ) . "&nbsp;</option>\n";
-									}
-								?>
-							</select><br />
-						<?php break;
-						case 'text': ?>
-							<div><input type="text" name="<?php echo $this->plugin_prefix; ?>settings[<?php echo $setting; ?>]" id="<?php echo $this->dashed_name . '-' . $setting; ?>" class="postform" value="<?php echo esc_attr( $value ); ?>" /></div>
-						<?php break;
-						case 'echo': ?>
-							<div><span id="<?php echo $this->dashed_name . '-' . $setting; ?>" class="postform"><?php echo esc_attr( $value ); ?></span></div>
-						<?php break;
-						default: ?>
-							<?php echo $this->settings_texts[$setting]['type']; ?>
-						<?php break;
-					endswitch; ?>
-					<?php if ( !empty( $this->settings_texts[$setting]['desc'] ) ) { echo $this->settings_texts[$setting]['desc']; } ?>
-				</td>
-			</tr>
-			<?php endforeach; ?>
-			<?php if ( 1 == $this->settings['enable'] ): ?>
-				<tr>
-					<td colspan="3">
-						<p>You enabled wp-cron-control. To make sure that scheduled tasks are still executed correctly you will need to setup a system cron job that will call wp-cron.php with the secret parameter defined in the settings.</p>
-						<p>
-							You can either use the function defined in this script and setup a cron job that calls either
-						</p>
-						<p><code>php <?php echo __FILE__; ?> <?php echo get_site_url(); ?> <?php echo $this->settings['secret_string']; ?></code></p>
-						<p>or</p>
-						<p><code>wget -q "<?php echo get_site_url(); ?>/wp-cron.php?doing_wp_cron&<?php echo $this->settings['secret_string']; ?>"</code></p>
-						<p>You can setup an interval as low as one minute, but should consider a reasonable value of 5-15 minutes as well.</p>
-						<p>If you need help setting up a cron job please refer to the documentation that your provider offers.</p>
-						<p>Anyway, chances are high that either <a href="http://docs.cpanel.net/twiki/bin/view/AllDocumentation/CpanelDocs/CronJobs#Adding a cron job" target="_blank">the CPanel</a>, <a href="http://download1.parallels.com/Plesk/PP10/10.3.1/Doc/en-US/online/plesk-administrator-guide/plesk-control-panel-user-guide/index.htm?fileName=65208.htm" target="_blank">Plesk</a> or <a href="http://www.thegeekstuff.com/2011/07/php-cron-job/" target="_blank">the crontab</a> documentation will help you.</p>
+	public function settings_page() { 
+		if ( !current_user_can( 'manage_options' ) )  {
+			wp_die( __( 'You do not permission to access this page' ) );
+		}
+		?>
+		<div class="wrap">
+		<?php if ( function_exists('screen_icon') ) screen_icon(); ?>
+			<h2><?php echo $this->settings_page_name; ?></h2>
+		
+			<form method="post" action="options.php">
+		
+			<?php settings_fields( $this->plugin_prefix . 'settings' ); ?>
+		
+			<table class="form-table">
+				<?php foreach( $this->settings as $setting => $value): ?>
+				<tr valign="top">
+					<th scope="row"><label for="<?php echo $this->dashed_name . '-' . $setting; ?>"><?php if ( isset( $this->settings_texts[$setting]['label'] ) ) { echo $this->settings_texts[$setting]['label']; } else { echo $setting; } ?></label></th>
+					<td>
+						<?php switch( $this->settings_texts[$setting]['type'] ):
+							case 'yesno': ?>
+								<select name="<?php echo $this->plugin_prefix; ?>settings[<?php echo $setting; ?>]" id="<?php echo $this->dashed_name . '-' . $setting; ?>" class="postform">
+									<?php 
+										$yesno = array( 0 => 'No', 1 => 'Yes' ); 
+										foreach ( $yesno as $val => $txt ) {
+											echo '<option value="' . esc_attr( $val ) . '"' . selected( $value, $val, false ) . '>' . esc_html( $txt ) . "&nbsp;</option>\n";
+										}
+									?>
+								</select><br />
+							<?php break;
+							case 'text': ?>
+								<div><input type="text" name="<?php echo $this->plugin_prefix; ?>settings[<?php echo $setting; ?>]" id="<?php echo $this->dashed_name . '-' . $setting; ?>" class="postform" value="<?php echo esc_attr( $value ); ?>" /></div>
+							<?php break;
+							case 'echo': ?>
+								<div><span id="<?php echo $this->dashed_name . '-' . $setting; ?>" class="postform"><?php echo esc_attr( $value ); ?></span></div>
+							<?php break;
+							default: ?>
+								<?php echo $this->settings_texts[$setting]['type']; ?>
+							<?php break;
+						endswitch; ?>
+						<?php if ( !empty( $this->settings_texts[$setting]['desc'] ) ) { echo $this->settings_texts[$setting]['desc']; } ?>
 					</td>
 				</tr>
-			<?php endif; ?>
-		</table>
+				<?php endforeach; ?>
+				<?php if ( 1 == $this->settings['enable'] ): ?>
+					<tr>
+						<td colspan="3">
+							<p>You enabled wp-cron-control. To make sure that scheduled tasks are still executed correctly you will need to setup a system cron job that will call wp-cron.php with the secret parameter defined in the settings.</p>
+							<p>
+								You can either use the function defined in this script and setup a cron job that calls either
+							</p>
+							<p><code>php <?php echo __FILE__; ?> <?php echo get_site_url(); ?> <?php echo $this->settings['secret_string']; ?></code></p>
+							<p>or</p>
+							<p><code>wget -q "<?php echo get_site_url(); ?>/wp-cron.php?doing_wp_cron&<?php echo $this->settings['secret_string']; ?>"</code></p>
+							<p>You can setup an interval as low as one minute, but should consider a reasonable value of 5-15 minutes as well.</p>
+							<p>If you need help setting up a cron job please refer to the documentation that your provider offers.</p>
+							<p>Anyway, chances are high that either <a href="http://docs.cpanel.net/twiki/bin/view/AllDocumentation/CpanelDocs/CronJobs#Adding a cron job" target="_blank">the CPanel</a>, <a href="http://download1.parallels.com/Plesk/PP10/10.3.1/Doc/en-US/online/plesk-administrator-guide/plesk-control-panel-user-guide/index.htm?fileName=65208.htm" target="_blank">Plesk</a> or <a href="http://www.thegeekstuff.com/2011/07/php-cron-job/" target="_blank">the crontab</a> documentation will help you.</p>
+						</td>
+					</tr>
+				<?php endif; ?>
+			</table>
+			
+			<p class="submit">
+		<?php
+				if ( function_exists( 'submit_button' ) ) {
+					submit_button( null, 'primary', $this->dashed_name . '-submit', false );
+					echo ' ';
+					submit_button( 'Reset to Defaults', 'primary', $this->dashed_name . '-defaults', false );
+				} else {
+					echo '<input type="submit" name="' . $this->dashed_name . '-submit" class="button-primary" value="Save Changes" />' . "\n";
+					echo '<input type="submit" name="' . $this->dashed_name . '-defaults" id="' . $this->dashed_name . '-defaults" class="button-primary" value="Reset to Defaults" />' . "\n";
+				}
+		?>
+			</p>
 		
-		<p class="submit">
-	<?php
-			if ( function_exists( 'submit_button' ) ) {
-				submit_button( null, 'primary', $this->dashed_name . '-submit', false );
-				echo ' ';
-				submit_button( 'Reset to Defaults', 'primary', $this->dashed_name . '-defaults', false );
-			} else {
-				echo '<input type="submit" name="' . $this->dashed_name . '-submit" class="button-primary" value="Save Changes" />' . "\n";
-				echo '<input type="submit" name="' . $this->dashed_name . '-defaults" id="' . $this->dashed_name . '-defaults" class="button-primary" value="Reset to Defaults" />' . "\n";
-			}
-	?>
-		</p>
-	
-		</form>
-	</div>
-	
-	<?php
+			</form>
+		</div>
+		
+		<?php
 	}
 	
 	public function validate_cron_request() {
