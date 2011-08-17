@@ -4,7 +4,7 @@
  Plugin URI: http://wordpress.org/extend/plugins/wp-cron-control/
  Description: get control over wp-cron execution.
  Author: Thorsten Ott, Automattic
- Version: 0.2
+ Version: 0.3
  Author URI: http://hitchhackerguide.com
  */
 
@@ -36,12 +36,14 @@ class WP_Cron_Control {
 		
 		$this->default_settings = (array) apply_filters( $this->plugin_prefix . 'default_settings', array(
 			'enable'				=> 1,
+			'enable_scheduled_post_validation' => 0,
 			'secret_string'			=> md5( __FILE__ . $blog_id ),
 		) );
 		
 		$this->settings_texts = (array) apply_filters( $this->plugin_prefix . 'settings_texts', array(
 			'enable'				=> array( 'label' => 'Enable ' . $this->plugin_name, 'desc' => 'Enable this plugin and allow requests to wp-cron.php only with the appended secret parameter.', 'type' => 'yesno' ),
 			'secret_string'			=> array( 'label' => 'Secret string', 'desc' => 'The secret parameter that needs to be appended to wp-cron.php requests.', 'type' => 'text' ),
+			'enable_scheduled_post_validation'	=> array( 'label' => 'Enable scheduled post validation', 'desc' => 'In some rare cases it can happen that even when running wp-cron via a scheduled system cron job posts miss their schedule. This feature makes sure that there is a scheduled event for each scheduled post.', 'type' => 'yesno' ),
 		) );
 					
 		$user_settings = get_option( $this->plugin_prefix . 'settings' );
@@ -203,6 +205,10 @@ class WP_Cron_Control {
 					die( 'another cron process running or previous not older than 60 secs' );
 				
 				set_transient( 'doing_cron', $local_time );
+				
+				if ( 1 == self::instance()->settings['enable_scheduled_post_validation'] ) {
+					$this->validate_scheduled_posts();
+				}
 				return true;
 			}
 			// something went wrong
@@ -216,6 +222,40 @@ class WP_Cron_Control {
 		if ( !defined( 'DISABLE_WP_CRON' ) )
 			define( 'DISABLE_WP_CRON', true );
 		return false;
+	}
+	
+	public function validate_scheduled_posts() {
+		global $wpdb;
+		$sql = $wpdb->prepare( "SELECT ID, post_date_gmt FROM $wpdb->posts WHERE post_status = 'future' " );
+		$results = $wpdb->get_results( $sql );
+		$return = true;
+
+		if ( empty( $results ) )
+			return true;
+
+		foreach ( $results as $r ) {
+
+			$gmt_time  = strtotime( $r->post_date_gmt . ' GMT' );
+			$timestamp = wp_next_scheduled( 'publish_future_post', array( (int) $r->ID ) );
+
+			if ( $timestamp === false ) {
+				wp_schedule_single_event( $gmt_time, 'publish_future_post', array( (int) $r->ID ) );
+				$return = false;
+			} else {
+				//update timestamp to adjust for daylights savings change, when necessary
+				if ( $timestamp != $gmt_time ) {
+					wp_clear_scheduled_hook( 'publish_future_post', array( (int) $r->ID ) );
+					wp_schedule_single_event( $gmt_time, 'publish_future_post', array( (int) $r->ID ) );
+
+					$new_date = date( 'Y-m-d H:i:s', $gmt_time );
+					$sql_u = $wpdb->prepare( "UPDATE $wpdb->posts SET post_date_gmt=%s WHERE ID=%d", $new_date, $r->ID );
+					$wpdb->query( $sql_u );
+					$return = false;
+				}
+			}
+		}
+		
+		return $return;
 	}
 }
 
