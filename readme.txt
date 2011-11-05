@@ -30,6 +30,10 @@ This plugin performs a `remove_action( 'sanitize_comment_cookies', 'wp_cron' );`
 
 == ChangeLog ==
 
+= Version 0.4 =
+
+* Implementing feedback from Yoast http://yoast.com/wp-plugin-review/wp-cron-control/, fixing button classes, more inline comments 
+
 = Version 0.3 =
 
 * Added option to enable extra check that would search for missing jobs for scheduled posts and add them if necessary.
