@@ -2,7 +2,7 @@
 Contributors: tott, automattic
 Tags: wp-cron, cron, cron jobs, post missed schedule, scheduled posts
 Donate link: http://hitchhackerguide.com
-Tested up to: 3.1.2
+Tested up to: 3.3
 Stable tag: trunk
 
 This plugin allows you to take control over the execution of cron jobs. 
@@ -29,6 +29,10 @@ This plugin performs a `remove_action( 'sanitize_comment_cookies', 'wp_cron' );`
 1. Settings screen to enable/disable various features.
 
 == ChangeLog ==
+
+= Version 0.5 =
+
+* Adjustments for improved cron locking introduced in WordPress 3.3 http://core.trac.wordpress.org/changeset/18659
 
 = Version 0.4 =
 

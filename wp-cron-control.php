@@ -4,7 +4,7 @@
  Plugin URI: http://wordpress.org/extend/plugins/wp-cron-control/
  Description: get control over wp-cron execution.
  Author: Thorsten Ott, Automattic
- Version: 0.4
+ Version: 0.5
  Author URI: http://hitchhackerguide.com
  */
 
@@ -237,18 +237,30 @@ class WP_Cron_Control {
 				
 			// make sure a secret string is provided in the ur
 			if ( isset( $_GET[$secret] ) ) {
+			
 				// check if there is already a cron request running
 				$local_time = time();
-				$flag = get_transient('doing_cron');
-				if ( $flag > $local_time + 10*60 )
+				if ( function_exists( '_get_cron_lock' ) )
+					$flag = _get_cron_lock();
+				else
+					$flag = get_transient('doing_cron');
+					
+				if ( defined( 'WP_CRON_LOCK_TIMEOUT' ) )
+					$timeout = WP_CRON_LOCK_TIMEOUT;
+				else 
+					$timeout = 60;
+					
+				if ( $flag > $local_time + 10 * $timeout )
 					$flag = 0;
 					
 				// don't run if another process is currently running it or more than once every 60 sec.
-				if ( $flag + 60 > $local_time )
+				if ( $flag + $timeout > $local_time )
 					die( 'another cron process running or previous not older than 60 secs' );
 				
 				// set a transient to allow locking down parallel requests
 				set_transient( 'doing_cron', $local_time );
+			
+			
 				
 				// if settings allow it validate if there are any scheduled posts without a cron event
 				if ( 1 == self::instance()->settings['enable_scheduled_post_validation'] ) {
