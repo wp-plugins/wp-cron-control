@@ -30,6 +30,10 @@ This plugin performs a `remove_action( 'sanitize_comment_cookies', 'wp_cron' );`
 
 == ChangeLog ==
 
+= Version 0.6 =
+
+* Make sure that validated wp-cron-control requests also are valid in wp-cron.php by setting the global $doing_wp_cron value
+
 = Version 0.5 =
 
 * Adjustments for improved cron locking introduced in WordPress 3.3 http://core.trac.wordpress.org/changeset/18659
