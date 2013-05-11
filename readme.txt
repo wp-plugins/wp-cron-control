@@ -1,11 +1,11 @@
 === WP-Cron Control ===
-Contributors: tott, automattic
+Contributors: tott, ethitter, automattic
 Tags: wp-cron, cron, cron jobs, post missed schedule, scheduled posts
 Donate link: http://hitchhackerguide.com
-Tested up to: 3.3
-Stable tag: trunk
+Tested up to: 3.6
+Stable tag: 0.7
 
-This plugin allows you to take control over the execution of cron jobs. 
+This plugin allows you to take control over the execution of cron jobs.
 
 == Description ==
 
@@ -23,12 +23,17 @@ This plugin implements a secret parameter and ensures that cron jobs are only ex
 == Limitations ==
 
 This plugin performs a `remove_action( 'sanitize_comment_cookies', 'wp_cron' );` call in order to disable the spawning of new cron processes via the regular WordPress method. If `wp_cron` is hooked in an other action or called directly this might cause trouble.
- 
+
 == Screenshots ==
 
 1. Settings screen to enable/disable various features.
 
 == ChangeLog ==
+
+= Version 0.7 =
+
+* Remove unneeded use of `$wpdb->prepare()` that triggered PHP warnings because a second argument wasn't provided.
+* Update interface text to be translatable.
 
 = Version 0.6 =
 
@@ -40,7 +45,7 @@ This plugin performs a `remove_action( 'sanitize_comment_cookies', 'wp_cron' );`
 
 = Version 0.4 =
 
-* Implementing feedback from Yoast http://yoast.com/wp-plugin-review/wp-cron-control/, fixing button classes, more inline comments 
+* Implementing feedback from Yoast http://yoast.com/wp-plugin-review/wp-cron-control/, fixing button classes, more inline comments
 
 = Version 0.3 =
 
