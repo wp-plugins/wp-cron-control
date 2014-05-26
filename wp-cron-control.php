@@ -207,13 +207,13 @@ class WP_Cron_Control {
 								<div><input type="text" name="<?php echo $this->plugin_prefix; ?>settings[<?php echo $setting; ?>]" id="<?php echo $this->dashed_name . '-' . $setting; ?>" class="postform" value="<?php echo esc_attr( $value ); ?>" /></div>
 							<?php break;
 							case 'echo': ?>
-								<div><span id="<?php echo $this->dashed_name . '-' . $setting; ?>" class="postform"><?php echo esc_attr( $value ); ?></span></div>
+								<div><span id="<?php echo $this->dashed_name . '-' . $setting; ?>" class="postform"><?php echo esc_html( $value ); ?></span></div>
 							<?php break;
 							default: ?>
-								<?php echo $this->settings_texts[$setting]['type']; ?>
+								<?php echo esc_html( $this->settings_texts[$setting]['type'] ); ?>
 							<?php break;
 						endswitch; ?>
-						<?php if ( !empty( $this->settings_texts[$setting]['desc'] ) ) { echo $this->settings_texts[$setting]['desc']; } ?>
+						<?php if ( !empty( $this->settings_texts[$setting]['desc'] ) ) { echo wp_kses_post( $this->settings_texts[$setting]['desc'] ); } ?>
 					</td>
 				</tr>
 				<?php endforeach; ?>
