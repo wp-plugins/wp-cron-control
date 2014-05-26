@@ -4,8 +4,7 @@
  Plugin URI: http://wordpress.org/extend/plugins/wp-cron-control/
  Description: Take control of wp-cron execution.
  Author: Thorsten Ott, Erick Hitter, Automattic
- Version: 0.7
- Author URI: http://hitchhackerguide.com
+ Version: 0.7.1
  Text Domain: wp-cron-control
  */
 
