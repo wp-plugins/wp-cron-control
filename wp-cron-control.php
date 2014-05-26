@@ -142,23 +142,30 @@ class WP_Cron_Control {
 	}
 
 	public function validate_settings( $settings ) {
-		$validated_settings = $this->default_settings;
+		$validated_settings = array();
 
 		if ( !empty( $_POST[ $this->dashed_name . '-defaults'] ) ) {
 			// Reset to defaults
+			$validated_settings = $this->default_settings;
 			$_REQUEST['_wp_http_referer'] = add_query_arg( 'defaults', 'true', $_REQUEST['_wp_http_referer'] );
 		} else {
-			foreach ( $this->$this->settings_texts as $setting => $setting_info ) {
-				if ( ! isset( $settings[ $setting ] ) ) {
-					continue;
-				}
-
-				switch( $setting_info['type'] ) {
-					case 'yesno':
+			foreach ( $this->settings_texts as $setting => $setting_info ) {
+				switch( $setting ) {
+					case 'enable':
+					case 'enable_scheduled_post_validation':
 						$validated_settings[ $setting ] = intval( $settings[ $setting ] );
+						if ( $validated_settings[ $setting ] > 1 || $validated_settings[ $setting ] < 0 ) {
+							$validated_settings[ $setting ] = $this->default_settings[ $setting ];
+						}
 						break;
 
-					case 'text':
+					case 'secret_string':
+						$validated_settings[ $setting ] = sanitize_text_field( $settings[ $setting ] );
+						if ( empty( $validated_settings[ $setting ] ) ) {
+							$validated_settings[ $setting ] = $this->default_settings[ $setting ];
+						}
+						break;
+
 					default:
 						$validated_settings[ $setting ] = sanitize_text_field( $settings[ $setting ] );
 						break;
