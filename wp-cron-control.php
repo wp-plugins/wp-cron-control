@@ -142,15 +142,31 @@ class WP_Cron_Control {
 	}
 
 	public function validate_settings( $settings ) {
-		// reset to defaults
-		if ( !empty( $_POST[ $this->dashed_name . '-defaults'] ) ) {
-			$settings = $this->default_settings;
-			$_REQUEST['_wp_http_referer'] = add_query_arg( 'defaults', 'true', $_REQUEST['_wp_http_referer'] );
-		// or do some custom validations
-		} else {
+		$validated_settings = $this->default_settings;
 
+		if ( !empty( $_POST[ $this->dashed_name . '-defaults'] ) ) {
+			// Reset to defaults
+			$_REQUEST['_wp_http_referer'] = add_query_arg( 'defaults', 'true', $_REQUEST['_wp_http_referer'] );
+		} else {
+			foreach ( $this->$this->settings_texts as $setting => $setting_info ) {
+				if ( ! isset( $settings[ $setting ] ) ) {
+					continue;
+				}
+
+				switch( $setting_info['type'] ) {
+					case 'yesno':
+						$validated_settings[ $setting ] = intval( $settings[ $setting ] );
+						break;
+
+					case 'text':
+					default:
+						$validated_settings[ $setting ] = sanitize_text_field( $settings[ $setting ] );
+						break;
+				}
+			}
 		}
-		return $settings;
+
+		return $validated_settings;
 	}
 
 	public function settings_page() {
