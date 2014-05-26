@@ -2,6 +2,7 @@
 Contributors: tott, ethitter, automattic
 Tags: wp-cron, cron, cron jobs, post missed schedule, scheduled posts
 Donate link: http://hitchhackerguide.com
+Requires at least: 3.4
 Tested up to: 3.9
 Stable tag: 0.7
 

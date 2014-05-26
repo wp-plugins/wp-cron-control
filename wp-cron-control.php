@@ -127,7 +127,7 @@ class WP_Cron_Control {
 		 * and  http://core.trac.wordpress.org/browser/trunk/wp-includes/cron.php#L258
 		 */
 		if ( 1 == $this->settings['enable'] ) {
-			remove_action( 'sanitize_comment_cookies', 'wp_cron' );
+			remove_action( 'init', 'wp_cron' );
 			add_action( 'init', array( &$this, 'validate_cron_request' ) );
 		}
 
